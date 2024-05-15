@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:restauran_app/data/kategorilist.dart';
+import 'package:restauran_app/models/Restoran.dart';
 import 'package:restauran_app/style/theme.dart';
 
 class HomePage extends StatelessWidget {
@@ -89,7 +92,7 @@ class HomePage extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 10),
                 Padding(
                   padding: const EdgeInsets.all(10.0),
                   child: Row(
@@ -97,8 +100,8 @@ class HomePage extends StatelessWidget {
                     children: [
                       Text(
                         "Kategori",
-                        style: GoogleFonts.poppins(
-                            fontSize: 24, fontWeight: FontWeight.w800),
+                        style: GoogleFonts.playfairDisplay(
+                            fontSize: 34, fontWeight: FontWeight.w800),
                       ),
                       Text(
                         "See all",
@@ -172,10 +175,24 @@ class HomePage extends StatelessWidget {
                       children: [
                         Text(
                           "Restauran",
-                          style: GoogleFonts.poppins(
-                              fontSize: 30, fontWeight: FontWeight.w800),
+                          style: GoogleFonts.playfairDisplay(
+                              fontSize: 34, fontWeight: FontWeight.w800),
                         ),
-                        FutureBuilder(future: , builder: builder)
+                        FutureBuilder(future: DefaultAssetBundle.of(context).loadString('assets/json/data.json'), builder: (context, snapshot) {
+                          List mydata = json.decode(snapshot.data.toString())['restaurants'];
+                          List<Restaurants> dataRestauran = mydata.map((e) {
+                            return Restaurants.fromJson(e);
+                          },).toList();
+                          
+                          return ListView.builder(
+                            shrinkWrap: true,
+                            itemCount: dataRestauran.length,
+                            itemBuilder: (BuildContext context, int index) {
+                              return Text(dataRestauran[index].name.toString());
+                            },
+                          );
+                        }
+                        )
                       ],
                     ),
                   ),
