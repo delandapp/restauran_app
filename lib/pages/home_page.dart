@@ -1,16 +1,21 @@
 import 'dart:convert';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:restauran_app/data/kategorilist.dart';
 import 'package:restauran_app/models/Restoran.dart';
+import 'package:restauran_app/pages/details_page.dart';
 import 'package:restauran_app/style/theme.dart';
 
 class HomePage extends StatelessWidget {
+  static const String routeName = '/home_page';
   const HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    double widthBody = MediaQuery.of(context).size.width;
+    double heightBody = MediaQuery.of(context).size.height;
     return Scaffold(
       body: SafeArea(
         child: NestedScrollView(
@@ -81,7 +86,7 @@ class HomePage extends StatelessWidget {
                       ),
                       prefixIcon: const Icon(
                         Icons.search,
-                        color: secondaryColor,
+                        color: Color.fromARGB(255, 131, 131, 131),
                       ),
                       fillColor: primaryColor,
                       filled: true,
@@ -116,14 +121,15 @@ class HomePage extends StatelessWidget {
                 ),
                 const SizedBox(height: 5),
                 Padding(
-                  padding: const EdgeInsets.all(10.0),
+                  padding: EdgeInsets.symmetric(horizontal: widthBody * 0.05),
                   child: SizedBox(
-                    height: 70,
+                    height: heightBody * 0.12,
                     child: ListView.separated(
                       itemBuilder: (context, index) {
                         return GestureDetector(
                           onTap: () {},
                           child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Container(
                                 height: 50,
@@ -145,7 +151,7 @@ class HomePage extends StatelessWidget {
                               Text(
                                 categoriesRestauran[index].name,
                                 style: GoogleFonts.poppins(
-                                    fontSize: 12, fontWeight: FontWeight.w600),
+                                    fontSize: 11, fontWeight: FontWeight.w600),
                               )
                             ],
                           ),
@@ -162,7 +168,8 @@ class HomePage extends StatelessWidget {
                 const SizedBox(height: 20),
                 Expanded(
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 20.0,vertical: 15.0),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20.0, vertical: 15.0),
                     width: double.infinity,
                     decoration: const BoxDecoration(
                         color: Colors.white,
@@ -178,20 +185,36 @@ class HomePage extends StatelessWidget {
                           style: GoogleFonts.playfairDisplay(
                               fontSize: 34, fontWeight: FontWeight.w800),
                         ),
-                        FutureBuilder(future: DefaultAssetBundle.of(context).loadString('assets/json/data.json'), builder: (context, snapshot) {
-                          List mydata = json.decode(snapshot.data.toString())['restaurants'];
-                          List<Restaurants> dataRestauran = mydata.map((e) {
-                            return Restaurants.fromJson(e);
-                          },).toList();
-                          
-                          return ListView.builder(
-                            shrinkWrap: true,
-                            itemCount: dataRestauran.length,
-                            itemBuilder: (BuildContext context, int index) {
-                              return Text(dataRestauran[index].name.toString());
-                            },
-                          );
-                        }
+                        const SizedBox(height: 10),
+                        Expanded(
+                          child: FutureBuilder(
+                              future: DefaultAssetBundle.of(context)
+                                  .loadString('assets/json/data.json'),
+                              builder: (context, snapshot) {
+                                List mydata = json.decode(
+                                    snapshot.data.toString())['restaurants'];
+                                List<Restaurants> dataRestauran = mydata.map(
+                                  (e) {
+                                    return Restaurants.fromJson(e);
+                                  },
+                                ).toList();
+
+                                return ListView.separated(
+                                  scrollDirection: Axis.vertical,
+                                  itemCount: dataRestauran.length,
+                                  itemBuilder:
+                                      (BuildContext context, int index) {
+                                    return GestureDetector(
+                                      onTap: () {
+                                        Navigator.pushNamed(context, DetailsPage.routeName, arguments: dataRestauran[index]);
+                                      },
+                                      child: CardRestauran(
+                                          restaurants: dataRestauran[index]),
+                                    );
+                                  },
+                                  separatorBuilder: (context, index) => const SizedBox(height: 30,),
+                                );
+                              }),
                         )
                       ],
                     ),
@@ -202,6 +225,90 @@ class HomePage extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+// ignore: must_be_immutable
+class CardRestauran extends StatelessWidget {
+  Restaurants restaurants;
+  CardRestauran({super.key, required this.restaurants});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Hero(
+          tag: restaurants.pictureId.toString(),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: Image.network(
+              restaurants.pictureId.toString(),
+              height: 180,
+              fit: BoxFit.fill,
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(left: 5, top: 15),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                restaurants.name.toString(),
+                style: GoogleFonts.poppins(
+                    fontSize: 16, fontWeight: FontWeight.w800),
+              ),
+              Row(
+                children: [
+                  Icon(
+                    CupertinoIcons.star_circle_fill,
+                    color: Colors.amber[900],
+                    size: 14.0,
+                  ),
+                  const SizedBox(
+                    width: 4,
+                  ),
+                  Text(restaurants.rating.toString()),
+                ],
+              ),
+            ],
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(left: 5),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                restaurants.city.toString(),
+                style: GoogleFonts.poppins(
+                    fontSize: 12, fontWeight: FontWeight.w500),
+              ),
+              Row(
+                children: [
+                  Icon(
+                    CupertinoIcons.money_dollar,
+                    color: Colors.amber[900],
+                    size: 14.0,
+                  ),
+                  Icon(
+                    CupertinoIcons.money_dollar,
+                    color: Colors.amber[900],
+                    size: 14.0,
+                  ),
+                  Icon(
+                    CupertinoIcons.money_dollar,
+                    color: Colors.grey[900],
+                    size: 14.0,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

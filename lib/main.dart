@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:restauran_app/models/Restoran.dart';
+import 'package:restauran_app/pages/details_page.dart';
 import 'package:restauran_app/pages/home_page.dart';
 import 'package:restauran_app/style/theme.dart';
 
@@ -37,7 +39,12 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-      home: const HomePage(),
+      initialRoute: '/home_page',
+      routes: {
+        HomePage.routeName: (context) => const HomePage(),
+        // ignore: equal_keys_in_map
+        DetailsPage.routeName: (context) => DetailsPage(restaurants: ModalRoute.of(context)?.settings.arguments as Restaurants),
+      },
     );
   }
 }
